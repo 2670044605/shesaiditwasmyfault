@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today | 刚刚好</title>
+    <style>
+        :root {
+            --font-serif: "Georgia", "Songti SC", "SimSun", serif;
+            --text-color: #ffffff;
+            /* 文字卡片的背景，降低了透明度，让背景图更清晰，同时保证字能看清 */
+            --card-bg: rgba(0, 0, 0, 0.35); 
+            --player-size: 60px; /* 播放器大小 */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+
+            /* 背景图设置：清晰、全屏适配 */
+            background-image: url('./bg.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
+        /* 布局容器：加宽了宽度，让文字显示更多 */
+        .container {
+            max-width: 1000px; /* 从800改到了1000，显示更多内容 */
+            margin: 0 auto;
+            padding: 60px 20px; /* 顶部留白 */
+        }
+
+        /* 核心长文卡片 */
+        .essay-card {
+            /* 极简的玻璃感，边缘清晰 */
+            background: var(--card-bg);
+            backdrop-filter: blur(5px); /* 轻微模糊，提升文字可读性但不遮挡背景 */
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 8px;
+            padding: 50px 60px; /* 宽敞的内边距 */
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* 标题样式 */
+        h1 {
+            font-family: var(--font-serif);
+            font-weight: normal;
+            font-size: 2.2rem;
+            margin-bottom: 40px;
+            text-align: center;
+            letter-spacing: 4px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* 增加文字阴影，防止背景太亮看不清 */
+        }
+
+        /* 正文排版优化 */
+        .essay-content {
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            line-height: 1.8;
+            text-align: justify;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6); /* 关键：让白字在任何背景上都清晰 */
+        }
+
+        .essay-content p {
+            margin-bottom: 25px; /* 段落间距 */
+        }
+
+        /* --- 旋转音乐播放器 --- */
+        .music-disc {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: var(--player-size);
+            height: var(--player-size);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 100;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+            background: #000;
+            
+            /* 旋转动画设置 */
+            animation: rotatePlayer 10s linear infinite;
+            animation-play-state: paused; /* 默认暂停，播放时才转 */
+        }
+
+        /* 播放器里的封面图 */
+        .music-disc img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.9;
+        }
+
+        /* 播放状态：开始旋转 */
+        .music-disc.playing {
+            animation-play-state: running;
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+
+        /* 旋转关键帧 */
+        @keyframes rotatePlayer {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 600px) {
+            .essay-card { padding: 30px 20px; }
+            h1 { font-size: 1.6rem; margin-bottom: 30px; }
+            .essay-content { font-size: 1rem; }
+            .music-disc { bottom: 20px; right: 20px; width: 50px; height: 50px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 音乐播放器 (右下角圆形) -->
+    <!-- 点击触发播放/暂停 -->
+    <div class="music-disc" id="musicDisc" title="薛之谦 - 刚刚好">
+        <!-- 如果你有专门的封面图，把 src 改为 cover.jpg，没有就用背景图代替 -->
+        <img src="./bg.jpg" alt="Music Cover">
+        <audio id="bgm" loop>
+            <source src="./music.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <div class="container">
+        <article class="essay-card">
+            <h1>是我的问题</h1>
+            
+            <div class="essay-content">
+                <!-- 在这里写你的正文 -->
+                <p>
+                    如果我们的距离到这刚刚好，那我是不是就不该再往前走一步了。
+                </p>
+                <p>
+                    今晚把以前的聊天记录翻了一遍，突然看到那句话，“是我的问题”。
+                    当时的我急着辩解，���着把责任推得一干二净，生怕自己沾染上一丁点错误。
+                    可现在安静下来想，那或许真的是一种保护色。我们太害怕被指责，
+                    所以先用道歉来结束话题，或者用愤怒来掩盖心虚。
+                </p>
+                <p>
+                    我想做一个这样的地方，不是为了给谁看，只是想在这个喧闹的互联网里，
+                    找一个角落，安安静静地承认：是的，那天确实是我的问题。
+                    我没有控制好情绪，我没有理解你的言外之意，我太过于纠结对错，
+                    而忘记了其实拥抱比讲道理更重要。
+                </p>
+                <p>
+                    薛之谦唱着“用力爱过的人不该计较”，可我们不仅计较，还锱铢必较。
+                    背景里的光影在晃动，就像记忆里那些模糊的片段。
+                    写下这些文字的时候，不仅是在记录，也是在和自己和解吧。
+                </p>
+                <p>
+                    （在这里你可以继续写几千字，页面会自动拉长，背景图保持不动...）
+                </p>
+                <p>
+                    世界很大，无论是代码的 Bug 还是人生的 Bug，修补它们的第一步，
+                    永远是那句诚实的：This is my fault.
+                </p>
+            </div>
+        </article>
+    </div>
+
+    <script>
+        // 获取元素
+        const musicDisc = document.getElementById('musicDisc');
+        const bgm = document.getElementById('bgm');
+
+        // 尝试自动播放功能
+        function tryAutoPlay() {
+            bgm.play().then(() => {
+                // 如果自动播放成功，让唱片开始旋转
+                musicDisc.classList.add('playing');
+            }).catch(error => {
+                // 如果自动播放被拦截（这很正常），保持静止，等待用户点击
+                console.log("自动播放被拦截，等待交互");
+            });
+        }
+
+        // 页面加载完成后尝试播放
+        window.addEventListener('DOMContentLoaded', tryAutoPlay);
+
+        // 点击唱片切换播放/暂停
+        musicDisc.addEventListener('click', function() {
+            if (bgm.paused) {
+                bgm.play();
+                this.classList.add('playing'); // 开始旋转
+            } else {
+                bgm.pause();
+                this.classList.remove('playing'); // 停止旋转
+            }
+        });
+    </script>
+</body>
+</html>
