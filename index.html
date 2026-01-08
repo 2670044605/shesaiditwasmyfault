@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Today | shesaiditwasmyfault</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lora:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --font-serif: "Georgia", "Songti SC", "SimSun", serif;
+            --font-heading: "Playfair Display", "Songti SC", serif;
+            --font-body: "Lora", "Songti SC", serif;
             --text-color: #ffffff;
             --card-bg: rgba(0, 0, 0, 0.45); /* 稍微加深一点背景，提升对比度 */
             --player-size: 60px;
@@ -60,7 +65,7 @@
         }
 
         h1 {
-            font-family: var(--font-serif);
+            font-family: var(--font-heading);
             font-weight: normal;
             /* 使用 clamp 实现流体字体：最小 1.5rem，最大 2.2rem */
             font-size: clamp(1.5rem, 5vw, 2.2rem);
@@ -71,7 +76,7 @@
         }
 
         .essay-content {
-            font-family: var(--font-serif);
+            font-family: var(--font-body);
             font-size: 1.1rem;
             line-height: 1.8;
             text-align: justify;
