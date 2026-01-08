@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Today | shesaiditwasmyfault</title>
     
-    <!-- 新增：默认设置背景图为网页图标 -->
+    <!-- 默认图标，会被下方 JS 覆盖为圆形 -->
     <link rel="icon" href="./bg.jpg" type="image/jpeg">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +16,7 @@
             --font-heading: "Playfair Display", "Songti SC", serif;
             --font-body: "Lora", "Songti SC", serif;
             --text-color: #ffffff;
-            --card-bg: rgba(0, 0, 0, 0.45); /* 稍微加深一点背景，提升对比度 */
+            --card-bg: rgba(0, 0, 0, 0.45);
             --player-size: 60px;
         }
 
@@ -31,7 +31,7 @@
             background-color: #1a1a1a;
         }
 
-        /* 性能优化：使用伪元素作为背景层，解决 iOS background-attachment: fixed 的卡顿问题 */
+        /* 背景层 */
         body::before {
             content: "";
             position: fixed;
@@ -45,23 +45,22 @@
             background-position: center;
             background-repeat: no-repeat;
             will-change: transform;
-            /* 可选：加一点遮罩让背景不那么抢眼 */
             filter: brightness(0.8);
         }
 
         .container {
-            width: 90%; /* 移动端默认宽度占比 */
+            width: 90%;
             max-width: 1000px;
             margin: 0 auto;
-            padding: 40px 0; /* 移动端减少顶部留白 */
+            padding: 40px 0;
         }
 
         .essay-card {
             background: var(--card-bg);
-            backdrop-filter: blur(10px); /* 增加模糊度 */
+            backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 12px;
-            padding: 30px 20px; /* 移动端默认内边距 */
+            padding: 30px 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: padding 0.3s ease;
@@ -70,7 +69,6 @@
         h1 {
             font-family: var(--font-heading);
             font-weight: normal;
-            /* 使用 clamp 实现流体字体：最小 1.5rem，最大 2.2rem */
             font-size: clamp(1.5rem, 5vw, 2.2rem);
             margin-bottom: 30px;
             text-align: center;
@@ -93,7 +91,6 @@
         /* 音乐播放器 */
         .music-disc {
             position: fixed;
-            /* 适配全面屏底部安全区域 */
             bottom: max(30px, calc(20px + env(safe-area-inset-bottom)));
             right: 20px;
             width: var(--player-size);
@@ -107,12 +104,12 @@
             background: #000;
             animation: rotatePlayer 10s linear infinite;
             animation-play-state: paused;
-            -webkit-tap-highlight-color: transparent; /* 移除点击时的蓝色高亮 */
+            -webkit-tap-highlight-color: transparent;
             transition: transform 0.2s;
         }
 
         .music-disc:active {
-            transform: scale(0.95); /* 点击时的微缩效果 */
+            transform: scale(0.95);
         }
 
         .music-disc img {
@@ -133,27 +130,22 @@
             to { transform: rotate(360deg); }
         }
 
-        /* 桌面端/平板适配优化 */
         @media (min-width: 768px) {
             .container {
                 width: 85%;
                 padding: 60px 20px;
             }
-            
             .essay-card {
-                padding: 50px 60px; /* 大屏恢复宽敞的内边距 */
+                padding: 50px 60px;
                 border-radius: 16px;
             }
-
             h1 {
                 margin-bottom: 40px;
                 letter-spacing: 4px;
             }
-
             .essay-content {
                 font-size: 1.15rem;
             }
-
             .music-disc {
                 bottom: 30px;
                 right: 30px;
@@ -163,7 +155,6 @@
 </head>
 <body>
 
-    <!-- 音乐播放器 -->
     <div class="music-disc" id="musicDisc" title="点击播放/暂停">
         <img src="./bg.jpg" alt="Music Cover">
         <audio id="bgm" loop>
@@ -210,10 +201,7 @@
         const musicDisc = document.getElementById('musicDisc');
         const bgm = document.getElementById('bgm');
 
-        // 优化自动播放逻辑
         function tryAutoPlay() {
-            // 很多现代浏览器禁止带声音的自动播放，必须用户交互
-            // 这里尝试播放，如果失败则静默等待用户点击
             const playPromise = bgm.play();
             if (playPromise !== undefined) {
                 playPromise.then(() => {
@@ -224,40 +212,76 @@
             }
         }
 
-        // 新增：自动设置 Favicon 与背景图一致
-        function updateFaviconFromBackground() {
-            // 获取 body::before 的样式
+        /**
+         * 自动化核心：
+         * 1. 读取 CSS 中的背景图 URL
+         * 2. 在内存中创建一个画布 (Canvas)
+         * 3. 将图片画在画布上，并裁剪成圆形
+         * 4. 导出为图标数据并设置给浏览器
+         */
+        function setCircularFavicon() {
+            // 1. 获取背景图 URL
             const style = window.getComputedStyle(document.body, '::before');
             const bgImage = style.getPropertyValue('background-image');
             
-            // 检查是否有背景图 (格式通常为 url("..."))
             if (bgImage && bgImage !== 'none' && bgImage.startsWith('url')) {
-                // 提取 URL 部分
-                let url = bgImage.slice(4, -1).replace(/["']/g, "");
+                // 提取纯净 URL
+                const url = bgImage.slice(4, -1).replace(/["']/g, "");
                 
-                // 查找或创建 link 标签
-                let link = document.querySelector("link[rel~='icon']");
-                if (!link) {
-                    link = document.createElement('link');
-                    link.rel = 'icon';
-                    document.head.appendChild(link);
-                }
-                
-                // 如果当前图标和背景图不一致，则更新
-                // 注意：这里简单的设置 href，浏览器会自动处理相对路径
-                if (!link.href.includes(url)) {
-                     link.href = url;
-                }
+                // 2. 加载图片进行处理
+                const img = new Image();
+                img.crossOrigin = "Anonymous"; // 允许处理本地或同源图片
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const size = 64; // 图标尺寸
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // 3. 绘制圆形裁剪路径
+                    ctx.beginPath();
+                    ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2, true);
+                    ctx.closePath();
+                    ctx.clip(); // 之后画的内容只会在圆形内显示
+                    
+                    // 计算图片“居中裁剪 (Cover)”的参数
+                    let sWidth = img.width;
+                    let sHeight = img.height;
+                    let sx = 0;
+                    let sy = 0;
+                    
+                    // 保持比例填满正方形
+                    if (sWidth > sHeight) {
+                        sx = (sWidth - sHeight) / 2;
+                        sWidth = sHeight;
+                    } else {
+                        sy = (sHeight - sWidth) / 2;
+                        sHeight = sWidth;
+                    }
+                    
+                    // 将图片画入圆形区域
+                    ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, size, size);
+                    
+                    // 4. 设置为图标
+                    const dataURL = canvas.toDataURL('image/png');
+                    let link = document.querySelector("link[rel~='icon']");
+                    if (!link) {
+                        link = document.createElement('link');
+                        link.rel = 'icon';
+                        document.head.appendChild(link);
+                    }
+                    link.href = dataURL;
+                    link.type = "image/png";
+                };
+                img.src = url;
             }
         }
 
-        // 仅在页面完全加载后尝试
         window.addEventListener('load', function() {
             tryAutoPlay();
-            updateFaviconFromBackground(); // 初始化时同步一次
+            setCircularFavicon(); // 执行圆形图标设置
         });
 
-        // 交互播放
         musicDisc.addEventListener('click', function() {
             if (bgm.paused) {
                 bgm.play();
@@ -267,8 +291,6 @@
                 this.classList.remove('playing');
             }
         });
-
-        // 额外优化：触摸屏幕任何地方首次互动后尝试播放（可选，视需求而定，目前保持点击播放器触发）
     </script>
 </body>
 </html>
