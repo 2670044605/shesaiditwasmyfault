@@ -19,12 +19,13 @@
             color: var(--text-color);
             min-height: 100vh;
             overflow-x: hidden;
-            /* 移除 body 上的背景图，改用 fixed div 以提升移动端性能 */
+            position: relative;
             background-color: #1a1a1a;
         }
 
-        /* 性能优化：独立的背景层，解决 iOS background-attachment: fixed 的卡顿问题 */
-        .bg-layer {
+        /* 性能优化：使用伪元素作为背景层，解决 iOS background-attachment: fixed 的卡顿问题 */
+        body::before {
+            content: "";
             position: fixed;
             top: 0;
             left: 0;
@@ -35,8 +36,9 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            will-change: transform;
             /* 可选：加一点遮罩让背景不那么抢眼 */
-            filter: brightness(0.8); 
+            filter: brightness(0.8);
         }
 
         .container {
@@ -152,9 +154,6 @@
     </style>
 </head>
 <body>
-
-    <!-- 独立的背景层 -->
-    <div class="bg-layer"></div>
 
     <!-- 音乐播放器 -->
     <div class="music-disc" id="musicDisc" title="点击播放/暂停">
