@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Today | shesaiditwasmyfault</title>
+    
+    <!-- 新增：默认设置背景图为网页图标 -->
+    <link rel="icon" href="./bg.jpg" type="image/jpeg">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lora:wght@400;500&display=swap" rel="stylesheet">
@@ -220,8 +224,38 @@
             }
         }
 
+        // 新增：自动设置 Favicon 与背景图一致
+        function updateFaviconFromBackground() {
+            // 获取 body::before 的样式
+            const style = window.getComputedStyle(document.body, '::before');
+            const bgImage = style.getPropertyValue('background-image');
+            
+            // 检查是否有背景图 (格式通常为 url("..."))
+            if (bgImage && bgImage !== 'none' && bgImage.startsWith('url')) {
+                // 提取 URL 部分
+                let url = bgImage.slice(4, -1).replace(/["']/g, "");
+                
+                // 查找或创建 link 标签
+                let link = document.querySelector("link[rel~='icon']");
+                if (!link) {
+                    link = document.createElement('link');
+                    link.rel = 'icon';
+                    document.head.appendChild(link);
+                }
+                
+                // 如果当前图标和背景图不一致，则更新
+                // 注意：这里简单的设置 href，浏览器会自动处理相对路径
+                if (!link.href.includes(url)) {
+                     link.href = url;
+                }
+            }
+        }
+
         // 仅在页面完全加载后尝试
-        window.addEventListener('load', tryAutoPlay);
+        window.addEventListener('load', function() {
+            tryAutoPlay();
+            updateFaviconFromBackground(); // 初始化时同步一次
+        });
 
         // 交互播放
         musicDisc.addEventListener('click', function() {
