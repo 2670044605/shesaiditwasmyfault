@@ -2,15 +2,14 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Today | shesaiditwasmyfault</title>
     <style>
         :root {
             --font-serif: "Georgia", "Songti SC", "SimSun", serif;
             --text-color: #ffffff;
-            /* 文字卡片的背景，降低了透明度，让背景图更清晰，同时保证字能看清 */
-            --card-bg: rgba(0, 0, 0, 0.35); 
-            --player-size: 60px; /* 播放器大小 */
+            --card-bg: rgba(0, 0, 0, 0.45); /* 稍微加深一点背景，提升对比度 */
+            --player-size: 60px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -20,63 +19,73 @@
             color: var(--text-color);
             min-height: 100vh;
             overflow-x: hidden;
+            /* 移除 body 上的背景图，改用 fixed div 以提升移动端性能 */
+            background-color: #1a1a1a;
+        }
 
-            /* 背景图设置：清晰、全屏适配 */
-            background-image: url('./bg.jpg'); 
+        /* 性能优化：独立的背景层，解决 iOS background-attachment: fixed 的卡顿问题 */
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: url('./bg.jpg');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
             background-repeat: no-repeat;
+            /* 可选：加一点遮罩让背景不那么抢眼 */
+            filter: brightness(0.8); 
         }
 
-        /* 布局容器：加宽了宽度，让文字显示更多 */
         .container {
-            max-width: 1000px; /* 从800改到了1000，显示更多内容 */
+            width: 90%; /* 移动端默认宽度占比 */
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 60px 20px; /* 顶部留白 */
+            padding: 40px 0; /* 移动端减少顶部留白 */
         }
 
-        /* 核心长文卡片 */
         .essay-card {
-            /* 极简的玻璃感，边缘清晰 */
             background: var(--card-bg);
-            backdrop-filter: blur(5px); /* 轻微模糊，提升文字可读性但不遮挡背景 */
-            -webkit-backdrop-filter: blur(5px);
-            border-radius: 8px;
-            padding: 50px 60px; /* 宽敞的内边距 */
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px); /* 增加模糊度 */
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 30px 20px; /* 移动端默认内边距 */
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: padding 0.3s ease;
         }
 
-        /* 标题样式 */
         h1 {
             font-family: var(--font-serif);
             font-weight: normal;
-            font-size: 2.2rem;
-            margin-bottom: 40px;
+            /* 使用 clamp 实现流体字体：最小 1.5rem，最大 2.2rem */
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            margin-bottom: 30px;
             text-align: center;
-            letter-spacing: 4px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* 增加文字阴影，防止背景太亮看不清 */
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* 正文排版优化 */
         .essay-content {
             font-family: var(--font-serif);
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             line-height: 1.8;
             text-align: justify;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.6); /* 关键：让白字在任何背景上都清晰 */
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
         }
 
         .essay-content p {
-            margin-bottom: 25px; /* 段落间距 */
+            margin-bottom: 20px;
         }
 
-        /* --- 旋转音乐播放器 --- */
+        /* 音乐播放器 */
         .music-disc {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
+            /* 适配全面屏底部安全区域 */
+            bottom: max(30px, calc(20px + env(safe-area-inset-bottom)));
+            right: 20px;
             width: var(--player-size);
             height: var(--player-size);
             border-radius: 50%;
@@ -86,13 +95,16 @@
             border: 2px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 0 15px rgba(0,0,0,0.4);
             background: #000;
-            
-            /* 旋转动画设置 */
             animation: rotatePlayer 10s linear infinite;
-            animation-play-state: paused; /* 默认暂停，播放时才转 */
+            animation-play-state: paused;
+            -webkit-tap-highlight-color: transparent; /* 移除点击时的蓝色高亮 */
+            transition: transform 0.2s;
         }
 
-        /* 播放器里的封面图 */
+        .music-disc:active {
+            transform: scale(0.95); /* 点击时的微缩效果 */
+        }
+
         .music-disc img {
             width: 100%;
             height: 100%;
@@ -100,34 +112,52 @@
             opacity: 0.9;
         }
 
-        /* 播放状态：开始旋转 */
         .music-disc.playing {
             animation-play-state: running;
             border-color: #fff;
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
         }
 
-        /* 旋转关键帧 */
         @keyframes rotatePlayer {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
 
-        /* 移动端适配 */
-        @media (max-width: 600px) {
-            .essay-card { padding: 30px 20px; }
-            h1 { font-size: 1.6rem; margin-bottom: 30px; }
-            .essay-content { font-size: 1rem; }
-            .music-disc { bottom: 20px; right: 20px; width: 50px; height: 50px; }
+        /* 桌面端/平板适配优化 */
+        @media (min-width: 768px) {
+            .container {
+                width: 85%;
+                padding: 60px 20px;
+            }
+            
+            .essay-card {
+                padding: 50px 60px; /* 大屏恢复宽敞的内边距 */
+                border-radius: 16px;
+            }
+
+            h1 {
+                margin-bottom: 40px;
+                letter-spacing: 4px;
+            }
+
+            .essay-content {
+                font-size: 1.15rem;
+            }
+
+            .music-disc {
+                bottom: 30px;
+                right: 30px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- 音乐播放器 (右下角圆形) -->
-    <!-- 点击触发播放/暂停 -->
-    <div class="music-disc" id="musicDisc" title="薛之谦 - 刚刚好">
-        <!-- 如果你有专门的封面图，把 src 改为 cover.jpg，没有就用背景图代替 -->
+    <!-- 独立的背景层 -->
+    <div class="bg-layer"></div>
+
+    <!-- 音乐播放器 -->
+    <div class="music-disc" id="musicDisc" title="点击播放/暂停">
         <img src="./bg.jpg" alt="Music Cover">
         <audio id="bgm" loop>
             <source src="./music.mp3" type="audio/mpeg">
@@ -139,7 +169,6 @@
             <h1>She said it was my fault</h1>
             
             <div class="essay-content">
-                <!-- 在这里写你的正文 -->
                 <p>
                     If this is the perfect distance between us, then perhaps I shouldn't take another step forward.
                 </p>
@@ -171,34 +200,38 @@
     </div>
 
     <script>
-        // 获取元素
         const musicDisc = document.getElementById('musicDisc');
         const bgm = document.getElementById('bgm');
 
-        // 尝试自动播放功能
+        // 优化自动播放逻辑
         function tryAutoPlay() {
-            bgm.play().then(() => {
-                // 如果自动播放成功，让唱片开始旋转
-                musicDisc.classList.add('playing');
-            }).catch(error => {
-                // 如果自动播放被拦截（这很正常），保持静止，等待用户点击
-                console.log("自动播放被拦截，等待交互");
-            });
+            // 很多现代浏览器禁止带声音的自动播放，必须用户交互
+            // 这里尝试播放，如果失败则静默等待用户点击
+            const playPromise = bgm.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    musicDisc.classList.add('playing');
+                }).catch(error => {
+                    console.log("Auto-play prevented by browser policy.");
+                });
+            }
         }
 
-        // 页面加载完成后尝试播放
-        window.addEventListener('DOMContentLoaded', tryAutoPlay);
+        // 仅在页面完全加载后尝试
+        window.addEventListener('load', tryAutoPlay);
 
-        // 点击唱片切换播放/暂停
+        // 交互播放
         musicDisc.addEventListener('click', function() {
             if (bgm.paused) {
                 bgm.play();
-                this.classList.add('playing'); // 开始旋转
+                this.classList.add('playing');
             } else {
                 bgm.pause();
-                this.classList.remove('playing'); // 停止旋转
+                this.classList.remove('playing');
             }
         });
+
+        // 额外优化：触摸屏幕任何地方首次互动后尝试播放（可选，视需求而定，目前保持点击播放器触发）
     </script>
 </body>
 </html>
