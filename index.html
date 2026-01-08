@@ -15,11 +15,20 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        html {
+            /* 防止移动端"橡皮筋"回弹效果 */
+            overscroll-behavior: none;
+            /* 即使发生回弹，露出的也是黑色而非白色 */
+            background-color: #000;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: var(--text-color);
             min-height: 100vh;
             overflow-x: hidden;
+            /* 防止移动端"橡皮筋"回弹效果 */
+            overscroll-behavior: none;
 
             /* 背景图设置：清晰、全屏适配 */
             background-image: url('./bg.jpg'); 
